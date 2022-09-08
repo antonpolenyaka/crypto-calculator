@@ -1,0 +1,134 @@
+<html>
+    <head>
+        <script src="https://cdn.jsdelivr.net/gh/ethereum/web3.js/dist/web3.min.js"></script>
+        <script>
+        //ABI del contrato calculadora
+        var ABI = [{"constant": true,"inputs": [],"name": "obtenerMemoria","outputs": [{"name": "","type": "int256"}],"payable": false,"stateMutability": "view","type": "function"},{"constant": true,"inputs": [{"name": "a","type": "int256"},{"name": "b","type": "int256"}],"name": "resta","outputs": [{"name": "","type": "int256"}],"payable": false,"stateMutability": "pure","type": "function"},{"constant": false,"inputs": [],"name": "borrarMemoria","outputs": [],"payable": false,"stateMutability": "nonpayable","type": "function"},{"constant": false,"inputs": [{"name": "resultado","type": "int256"}],"name": "almacenaMemoria","outputs": [{"name": "","type": "int256"}],"payable": false,"stateMutability": "nonpayable","type": "function"},{"constant": false,"inputs": [],"name": "Constructor","outputs": [],"payable": false,"stateMutability": "nonpayable","type": "function"},{"constant": true,"inputs": [{"name": "a","type": "int256"},{"name": "b","type": "int256"}],"name": "suma","outputs": [{"name": "","type": "int256"}],"payable": false,"stateMutability": "pure","type": "function"},{"constant": true,"inputs": [{"name": "a","type": "int256"}],"name": "restaMemoria","outputs": [{"name": "","type": "int256"}],"payable": false,"stateMutability": "view","type": "function"},{"constant": true,"inputs": [{"name": "a","type": "int256"}],"name": "sumaMemoria","outputs": [{"name": "","type": "int256"}],"payable": false,"stateMutability": "view","type": "function"}]; 
+        //Se instancia el objeto web3
+        var web3 = new Web3(new Web3.providers.HttpProvider("http://localhost:8545"));
+        //Se selecciona la primera de las cuentas (la de por defecto y única)
+        web3.eth.defaultAccount = web3.eth.accounts[0];
+        //Se desbloquea la cuenta
+        web3.personal.unlockAccount(web3.eth.defaultAccount, "");
+        //Se recupera el contrato calculadora con su dirección
+        var calculadora_contrato = web3.eth.contract(ABI);
+        var calculadora = web3.eth.contract(ABI).at("0xe5e613f79e5a74538694aeba05869e9594672e06");     
+        var operacion = "";
+        var operando1 = "";
+        function operacionBoton(op, op1)
+        { 
+            operacion = op;
+            operando1 = parseInt(op1);
+            return "0"; 
+        }
+        function memoria(operacion, operando)
+        { 
+            switch(operacion) 
+            {
+                case "MS":
+                    calculadora.almacenaMemoria.sendTransaction(parseInt(operando), {from: web3.eth.accounts[0], gas: 30000});
+                    return operando;
+                break;
+                case "MR":
+                    return calculadora.obtenerMemoria.call({from: web3.eth.accounts[0], gas: 30000});
+                break;
+                case "M+":
+                    return calculadora.sumaMemoria.call(parseInt(operando), {from: web3.eth.accounts[0], gas: 30000});
+                break;
+                case "M-":
+                    return calculadora.restaMemoria.call(parseInt(operando), {from: web3.eth.accounts[0], gas: 30000});
+                break; 
+            }
+        }
+        function calcular(operando2)
+        {         
+            switch(operacion) 
+            { 
+                case "+":
+                    return calculadora.suma.call(operando1, parseInt(operando2), {from: web3.eth.accounts[0], gas: 30000});
+                break;
+                case "-":
+                    return calculadora.resta.call(operando1, parseInt(operando2), {from: web3.eth.accounts[0], gas: 30000});
+                break; 
+            }
+        } 
+        </script>
+    </head>
+    <body>
+        <form name="calculadora">
+            <table>
+                <tr>
+                    <td colspan="5">
+                        <input type="text" name="pantalla" id="pantalla" value="0" disabled>
+                    </td>
+                </tr>
+                <tr>
+                    <td>
+                        <input type="button" name="uno" value="1" onclick="calculadora.pantalla.value += this.value">
+                    </td>
+                    <td>
+                        <input type="button" name="dos" value="2" onclick="calculadora.pantalla.value += this.value">
+                    </td>
+                    <td>
+                        <input type="button" name="tres" value="3" onclick="calculadora.pantalla.value += this.value">
+                    </td>
+                    <td>
+                        <input type="button" class="operador" name="suma" value="+" onclick="calculadora.pantalla.value=operacionBoton(this.value, calculadora.pantalla.value);">
+                    </td>
+                    <td>
+                        <input type="button" class="operador" name="M+" value="M+" onclick="calculadora.pantalla.value=memoria(this.value, calculadora.pantalla.value);">
+                    </td>
+                </tr>
+                <tr>
+                    <td>
+                        <input type="button" name="cuatro" value="4" onclick="calculadora.pantalla.value += this.value">
+                    </td>
+                    <td>
+                        <input type="button" name="cinco" value="5" onclick="calculadora.pantalla.value += this.value">
+                    </td>
+                    <td>
+                        <input type="button" name="seis" value="6" onclick="calculadora.pantalla.value += this.value">
+                    </td>
+                    <td>
+                        <input type="button" class="operador" name="menos" value="-" onclick="calculadora.pantalla.value=operacionBoton(this.value, calculadora.pantalla.value);">
+                    </td>
+                    <td>
+                        <input type="button" class="operator" name="M-" value="M-" onclick="calculadora.pantalla.value=memoria(this.value, calculadora.pantalla.value);">
+                    </td>
+                </tr>
+                <tr>
+                    <td>
+                        <input type="button" name="siete" value="7" onclick="calculadora.pantalla.value += this.value">
+                    </td>
+                    <td>
+                        <input type="button" name="ocho" value="8" onclick="calculadora.pantalla.value += this.value">
+                    </td>
+                    <td>
+                        <input type="button" name="nueve" value="9" onclick="calculadora.pantalla.value += this.value">
+                    </td>
+                    <td>
+                    </td>
+                    <td>
+                        <input type="button" class="operador" name="MS" value="MS" onclick="calculadora.pantalla.value=memoria(this.value, calculadora.pantalla.value)">
+                    </td>
+                </tr>
+                <tr>
+                    <td>
+                        <input type="button" id="borrar" name="borrar" value="c" onclick="calculadora.pantalla.value = '0'">
+                    </td>
+                    <td>
+                        <input type="button" name="zero" value="0" onclick="calculator.display.value += '0'">
+                    </td>
+                    <td>
+                        <input type="button" name="igual" value="=" onclick="calculadora.pantalla.value= calcular(calculadora.pantalla.value);">
+                    </td>
+                    <td>
+                    </td>
+                    <td>
+                        <input type="button" class="operador" name="MR" value="MR" onclick="calculadora.pantalla.value=memoria(this.value, calculadora.pantalla.value)">
+                    </td>
+                </tr>
+            </table>
+        </form>
+    </body>
+</html> 
